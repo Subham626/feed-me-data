@@ -367,8 +367,10 @@
                 alert('No data to copy.');
                 return;
             }
-            const headers = Object.keys(allData[0]);
-            let clipboardText = headers.join('\t') + '\n'; // Tab-separated headers
+            // Define headers in a fixed order to ensure consistency
+            const headers = ["Sl No", "Guest Mobile Number", "Guest Name", "Status", "Date", "Destination", "Trip Date", "Message"];
+            // Initialize clipboardText as an empty string to exclude headers
+            let clipboardText = ''; 
 
             allData.forEach(row => {
                 const rowData = headers.map(header => row[header] || '');
