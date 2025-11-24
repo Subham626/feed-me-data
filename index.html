@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Terminal</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #121212; /* Darker background */
+            color: #e0e0e0; /* Softer text color */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1 {
+            color: #bb86fc; /* A nice purple accent */
+            text-shadow: 0 0 8px rgba(187, 134, 252, 0.3);
+            border-bottom: 2px solid #373737;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: stretch; /* Align items for consistent height */
+        }
+        input[type="text"], input[type="date"], input[type="month"], datalist {
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            font-family: inherit;
+            flex-grow: 1; /* Allow inputs to grow */
+        }
+        input::placeholder {
+            color: #009900;
+        }
+        #add-guest-form {
+            background-color: #111;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: stretch;
+        }
+        button {
+            padding: 8px 15px;
+            color: #0a0a0a;
+            border: 1px solid;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            flex-shrink: 0; /* Prevent buttons from shrinking */
+        }
+        #addButton {
+            background-color: #bb86fc;
+            border-color: #bb86fc;
+        }
+        #addButton:hover {
+            background-color: #3700b3; /* Darker purple on hover */
+            border-color: #3700b3;
+            color: #fff;
+        }
+        #copyButton {
+            background-color: #03dac6; /* A teal accent */
+            border-color: #03dac6;
+            margin-left: auto; /* Pushes the button to the right */
+        }
+        #copyButton:hover {
+            background-color: #018786; /* Darker teal on hover */
+            border-color: #018786;
+            color: #fff;
+        }
+        #deleteButton {
+            background-color: #cf6679; /* A Material Design error color */
+            border-color: #cf6679;
+        }
+        #deleteButton:hover {
+            background-color: #b00020; /* Darker red on hover */
+            border-color: #b00020;
+            color: #fff;
+        }
+        #table-container {
+            width: 100%;
+            overflow-x: auto; /* Makes table scrollable on mobile */
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #373737;
+            text-align: left;
+            white-space: nowrap; /* Prevents text wrapping in cells */
+        }
+        thead {
+            background-color: #1f1f1f;
+            color: #bb86fc;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #1c1c1c;
+        }
+        tbody tr:hover {
+            background-color: #3700b3;
+            color: #fff;
+        }
+        #loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: #03dac6;
+        }
+
+        /* Responsive Design for Mobile */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            #add-guest-form {
+                gap: 15px; /* Increase gap for better spacing on mobile */
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            #add-guest-form, #controls {
+                flex-direction: column;
+            }
+            input[type="text"], input[type="date"], input[type="month"], button {
+                width: 100%;
+                box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            }
+            #copyButton {
+                margin-left: 0; /* Reset margin for stacked layout */
+            }
+
+            /* Card-based layout for the table on mobile */
+            #data-table {
+                border: none;
+                box-shadow: none;
+            }
+            #data-table thead {
+                display: none; /* Hide table headers */
+            }
+            #data-table tbody, #data-table tr, #data-table td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            #data-table tr {
+                margin-bottom: 15px;
+                border: 1px solid #333;
+                border-radius: 8px;
+                background-color: #1c1c1c;
+            }
+            #data-table td {
+                text-align: right; /* Align cell content to the right */
+                padding-left: 50%; /* Create space for the label */
+                position: relative;
+                border-bottom: 1px solid #373737;
+            }
+            #data-table td:before {
+                content: attr(data-label); /* Use data-label for the pseudo-element content */
+                position: absolute;
+                left: 12px;
+                width: calc(50% - 24px);
+                text-align: left;
+                font-weight: bold;
+                color: #bb86fc; /* Use accent color for labels */
+            }
+            #data-table tr:hover {
+                background-color: #3700b3;
+                color: #fff;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>DATA INPUT TERMINAL</h1>
+    <div id="add-guest-form">
+        <input type="text" id="newGuestMobile" placeholder="Guest Mobile Number" required>
+        <input type="text" id="newGuestName" placeholder="Guest Name (Optional)">
+        <input type="text" id="newStatus" placeholder="Status" list="status-options">
+        <input type="date" id="newDate">
+        <input type="text" id="newDestination" placeholder="Destination" list="destination-options">
+        <input type="date" id="newTripDate" placeholder="Trip Date">
+        <input type="text" id="newMessage" placeholder="Message (Optional)">
+        <button id="addButton">Add Entry</button>
+    </div>
+    <datalist id="destination-options">
+        <option value="Bhutan"></option>
+        <option value="Sikkim"></option>
+        <option value="Darjeeling"></option>
+    </datalist>
+    <datalist id="status-options">
+        <option value="Not Received Call"></option>
+        <option value="Cancelled"></option>
+        <option value="Not Interested"></option>
+        <option value="Wrong No"></option>
+    </datalist>
+    <div id="controls">
+        <input type="text" id="searchInput" placeholder="Search by Mobile Number...">
+        <button id="copyButton">Copy All Data</button>
+        <button id="deleteButton">Delete All Data</button>
+    </div>
+
+    <div id="loading">Initializing System...</div>
+    
+    <div id="table-container">
+        <table id="data-table" style="display:none;">
+            <thead>
+                <tr id="table-headers">
+                    <!-- Headers Generated by Script -->
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Data Ingested by Script -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const tableBody = document.getElementById('table-body');
+        const tableHeaders = document.getElementById('table-headers');
+        const dataTable = document.getElementById('data-table');
+        const loadingDiv = document.getElementById('loading');
+        const searchInput = document.getElementById('searchInput');
+        const addButton = document.getElementById('addButton');
+        const copyButton = document.getElementById('copyButton');
+        const deleteButton = document.getElementById('deleteButton');
+
+        const newGuestMobileInput = document.getElementById('newGuestMobile');
+        const newGuestNameInput = document.getElementById('newGuestName');
+        const newStatusInput = document.getElementById('newStatus');
+        const newDateInput = document.getElementById('newDate');
+        const newDestinationInput = document.getElementById('newDestination');
+        const newTripDateInput = document.getElementById('newTripDate');
+        const newMessageInput = document.getElementById('newMessage');
+
+        let allData = [];
+        let slNoCounter = 1;
+
+        function saveDataToLocal() {
+            localStorage.setItem('guestData', JSON.stringify(allData));
+        }
+
+        function loadLocalData() {
+            const storedData = localStorage.getItem('guestData');
+            if (storedData) {
+                allData = JSON.parse(storedData);
+                if (allData.length > 0) {
+                    // Find the max Sl No and set the counter accordingly to avoid duplicates
+                    const maxSlNo = Math.max(...allData.map(item => item['Sl No']));
+                    slNoCounter = maxSlNo + 1;
+                } else {
+                    slNoCounter = 1;
+                }
+            } else {
+                // If no data in local storage, use a default entry
+                allData = [
+                 { "Sl No": slNoCounter++, "Guest Mobile Number": "9876543210", "Guest Name": "John Doe", "Status": "Confirmed", "Date": "2025-11-24", "Destination": "Goa", "Trip Date": "2025-12-15", "Message": "Initial contact" }
+                ];
+            }
+
+            displayData(allData);
+            loadingDiv.style.display = 'none';
+            dataTable.style.display = 'table';
+        }
+
+        function displayData(data) {
+            tableHeaders.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableHeaders.innerHTML = '<th colspan="8">No Data Entries Found</th>';
+                return;
+            }
+
+            // Create headers from the keys of the first object
+            const headers = ["Sl No", "Guest Mobile Number", "Guest Name", "Status", "Date", "Destination", "Trip Date", "Message"];
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                tableHeaders.appendChild(th);
+            });
+
+            
+
+            // Create rows
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header] !== undefined ? row[header] : '';
+                    td.setAttribute('data-label', header); // For mobile card view
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = allData.filter(row => 
+                row['Guest Mobile Number'] && row['Guest Mobile Number'].toLowerCase().includes(searchTerm)
+            );
+            displayData(filteredData);
+        });
+
+        addButton.addEventListener('click', () => {
+            const guestMobile = newGuestMobileInput.value.trim();
+            if (!guestMobile) {
+                alert('Guest Mobile Number is a required field.');
+                return;
+            }
+
+            // Check for duplicate mobile number
+            const isDuplicate = allData.some(row => row['Guest Mobile Number'] === guestMobile);
+            if (isDuplicate) {
+                alert('This mobile number already exists. Please enter a unique number.');
+                return;
+            }
+
+            const newEntry = {
+                "Sl No": slNoCounter++,
+                "Guest Mobile Number": guestMobile,
+                "Guest Name": newGuestNameInput.value.trim(),
+                "Status": newStatusInput.value.trim(),
+                "Date": newDateInput.value,
+                "Destination": newDestinationInput.value.trim(),
+                "Trip Date": newTripDateInput.value,
+                "Message": newMessageInput.value.trim()
+            };
+
+            allData.push(newEntry);
+            displayData(allData);
+            saveDataToLocal(); // Save the new state to localStorage
+
+            // Clear input fields
+            newGuestMobileInput.value = '';
+            newGuestNameInput.value = '';
+            newStatusInput.value = '';
+            newDateInput.value = '';
+            newDestinationInput.value = '';
+            newTripDateInput.value = '';
+            newMessageInput.value = '';
+            newGuestMobileInput.focus();
+        });
+
+        copyButton.addEventListener('click', () => {
+            if (allData.length === 0) {
+                alert('No data to copy.');
+                return;
+            }
+            const headers = Object.keys(allData[0]);
+            let clipboardText = headers.join('\t') + '\n'; // Tab-separated headers
+
+            allData.forEach(row => {
+                const rowData = headers.map(header => row[header] || '');
+                clipboardText += rowData.join('\t') + '\n';
+            });
+
+            navigator.clipboard.writeText(clipboardText).then(() => {
+                const originalText = copyButton.textContent;
+                copyButton.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyButton.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy data: ', err);
+                alert('Failed to copy data. See console for details.');
+            });
+        });
+
+        deleteButton.addEventListener('click', () => {
+            if (allData.length === 0) {
+                alert('There is no data to delete.');
+                return;
+            }
+            if (confirm('Are you sure you want to delete all data? This action cannot be undone.')) {
+                allData = []; // Clear the array
+                slNoCounter = 1; // Reset the counter
+                saveDataToLocal(); // Save the empty state to localStorage
+                displayData(allData); // Refresh the table display
+            }
+        });
+
+        // Load initial local data
+        loadLocalData();
+    </script>
+
+</body>
+</html>
